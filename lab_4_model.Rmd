@@ -1,0 +1,20 @@
+---
+title: 'Lab #4 (model)'
+author: "Jerid Francom"
+date: "9/12/2021"
+output: 
+  html_document: 
+    toc: yes
+    number_sections: yes
+    df_print: kable
+---
+
+```{r setup, include=FALSE}
+library(tidyverse) # for data manipulation and graphing
+
+```
+
+# ...
+
+
+# References
