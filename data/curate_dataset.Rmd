@@ -1,0 +1,81 @@
+---
+title: "Curate CEDEL2 dataset"
+author: "Jerid Francom"
+date: "9/14/2021"
+output: 
+  html_document: 
+    number_sections: yes
+    df_print: kable
+---
+
+```{r setup, include=FALSE}
+library(tidyverse) # for general data manipulation
+library(janitor) # to normalize variable names
+library(tidytext) # to tokenize text
+```
+
+Read the CEDEL2 data. Description of the process is documented in the Text as Data coursebook in Chapter 5 "Acquire data". 
+
+```{r cedel-read-tsv}
+cedel_org <- 
+  read_tsv(file = "original/cedel2.tsv") %>% 
+  clean_names()
+```
+
+Look at the data original `cedel_org` dataset. 
+
+```{r cedel-glimpse}
+glimpse(cedel_org)
+```
+
+Let's look a some descriptives and see which variables have complete cases (complete_rate). 
+
+```{r cedel-skim}
+skimr::skim(cedel_org)
+```
+
+OK. It looks like we can focus on a few variables to select: 
+
+```{r}
+cedel <- 
+  cedel_org %>% 
+  select(filename, sex, proficiency, placement_test_score_percent, text)
+
+glimpse(cedel)
+```
+
+Let's tokenize the text and calculate some text measures (`num_tokens`, `num_types`, and `ttr`). 
+
+```{r cedel-unnest-tokens-measures}
+cedel <- 
+  cedel %>% 
+  unnest_tokens(output = words, input = text) %>% 
+  group_by(filename) %>% 
+  mutate(num_tokens = n(),
+         num_types = n_distinct(words),
+         ttr = round(num_types/ num_tokens, 3)) %>% 
+  ungroup() %>% 
+  distinct(filename, sex, proficiency, placement_test_score_percent, num_tokens, num_types, ttr)
+
+glimpse(cedel)
+```
+
+Create factors. 
+
+```{r cedel-factors-arrange}
+cedel <- 
+  cedel %>% 
+  mutate_if(is.character, as.factor) %>% 
+  mutate(proficiency = factor(proficiency, levels = c("Lower beginner", "Upper beginner", "Lower intermediate", "Upper intermediate", "Lower advanced", "Upper advanced")), ordered = TRUE) %>% 
+  arrange(proficiency, sex)
+
+cedel
+```
+Explore this curated dataset as an .rds file to maintain the factors in the dataset.
+
+```{r cedel-write}
+write_rds(x = cedel, file = "derived/cedel_dataset.rds")
+```
+
+
+

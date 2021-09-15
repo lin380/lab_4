@@ -7,14 +7,129 @@ output:
     toc: yes
     number_sections: yes
     df_print: kable
+  pdf_document: 
+    toc: yes
+    number_sections: yes
+    df_print: kable
+bibliography: references.bib
 ---
 
 ```{r setup, include=FALSE}
-library(tidyverse) # for data manipulation and graphing
-
+library(tidyverse) # to manipulate and visualize datasets
+library(janitor) # to create (cross-)tabulations
+library(skimr) # to provide statistical summaries
 ```
 
-# ...
+# Read and inspect
 
+```{r cedel-read-rds, include=FALSE}
+cedel <- read_rds(file = "data/derived/cedel_dataset.rds") # read cedel_dataset.rds
+
+glimpse(cedel) # overview of the dataset
+```
+
+In the CEDEL2 [@Lozano2009] dataset there are 1,931 compositions and seven variables. The variables `filename`, `sex`, and `proficiency` are categorical variables and the variables `placement_test_score_percent`, `num_tokens`, `num_types`, and `ttr` are continuous variables.
+
+-   `filename` = The record number for each composition
+-   `sex` = The biological sex of each L2 Spanish learner
+-   `proficiency` = A standardized learner level associated with each learner
+-   `placement_test_score_percent` = The score the learner received on a standardized placement test.
+-   `num_tokens` = The number of words in each composition
+-   `num_types` = The number of unique words in each composition.
+-   `ttr` = The Type/ Token Ratio for each composition
+
+# Single variables
+
+**Categorical**
+
+A summary of the categorical variable `sex` suggests that there are more females in this dataset than males.
+
+```{r cedel-sex}
+cedel %>% 
+  tabyl(sex) # create tabulation fo the `sex` variable
+```
+
+A summary of the categorical variable `proficiency` suggests that most learner levels have a similar number of participants, except for the lowest level ("Lower beginner"). 
+
+```{r cedel-proficiency}
+cedel %>% 
+  tabyl(proficiency) %>%  # create tabulation fo the `proficiency` variable
+  arrange(desc(n))
+```
+
+**Continuous**
+
+Let's first look at a set of descriptive statistics for all the continuous variables. 
+
+```{r cedel-continuous-variables-stats}
+cedel %>% # dataset
+  skim() %>% # get variety of numeric summaries
+  yank("numeric") # select only continuous variables (type: numeric)
+```
+
+The `ttr` appears to the show the least variability. 
+
+I'll select `placement_test_score_percent` and `ttr` to summarize visually. Since they are single variables, a density plot will give me an understanding as to how these variables are distributed. 
+
+```{r cedel-continuous-variables-plot}
+p1 <- 
+  cedel %>% # dataset
+  ggplot(aes(x = placement_test_score_percent)) + # map placement_test_score_percent to x
+  geom_density() # plot density
+
+p2 <- 
+  cedel %>% # dataset
+  ggplot(aes(x = ttr)) + # map ttr to x
+  geom_density() # plot density
+
+gridExtra::grid.arrange(p1, p2, ncol = 2) # arrange the plots side-by-side
+```
+
+`placement_test_score_percent` is clearly non-normal, and may even be bi-model (having two modes, distinct clumping of groups). `ttr` does have a shape which visually more normal but to verify, I will run a normality test, in this case the Shapiro-Wilk normality test.
+
+
+```{r cedel-shapiro-ttr}
+shapiro.test(cedel$ttr) # check for normality
+```
+
+# Multiple variables
+
+I would like explore two relationships: 
+
+1. What is the relationship between a learner's placement score and their proficiency level? 
+
+Since the `placement_test_score_percent` is continuous and `proficiency` is a categorical (ordinal) variable, I will use a box plot to visualize the relationship. 
+
+```{r cedel-placement-proficiency}
+cedel %>% # dataset
+  ggplot(aes(x = proficiency, y = placement_test_score_percent)) + # map proficiency to x, and placement_test_score_percent to y
+  geom_boxplot() + # create box plot
+  labs(x = "Learner Proficiency Level", y = "Placement Test Score")
+```
+From this visual summary, it appears that placement test scores and proficiency are related. A small, but potentially interesting observation is the potentially larger variability of placement scores for learners in the 'Upper beginner', 'Lower intermediate', and 'Upper intermediate' levels.
+
+2. What is the relationship between placement scores and lexical diversity (as measured by Type/ Token Ratio scores)?
+
+Since both the `placement_test_score_percent` and `ttr` are continuous variables I will summarize this relationship with a scatter plot. I will also add a linear trendline. 
+
+```{r cedel-placement-ttr, message=FALSE}
+cedel %>% # dataset
+  ggplot(aes(x = placement_test_score_percent, y = ttr)) + # map placement_test_score_percent to x and ttr to y
+  geom_point() + # plot x/y points
+  geom_smooth(method = "lm") + # plot linear trend line
+  labs(x = "Placement Test Scores", y = "Type/Token Ratio")
+```
+
+From this plot there appears to be a relationship towards more lexical diversity for more advanced learner levels --but not a particularly strong one. Let's assess the strength of this correlation. As both variables are non-normally distributed, I will use "kendall" for the method.
+
+```{r cedel-placement-ttr-correlation}
+cor(x = cedel$placement_test_score_percent, y = cedel$ttr, method = "kendall")
+```
+
+Yes, the correlation coefficient is on the weaker side. 
+
+# Assessment
+
+...
 
 # References
