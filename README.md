@@ -42,7 +42,7 @@ You can preview this README.md document by clicking the 'Preview' button in the 
 
 In this lab you will be working with a curated dataset drawn from the [CEDEL2 Corpus](http://cedel2.learnercorpora.com/) (L2 Spanish written corpus). The observations in this dataset represent compositions written by L1 English-L2 Spanish learners. 
 
-- Cite the dataset adding `bibiliography: references.bib` in the front matter and using the correct citation key (found in `references.bib`). 
+- Cite the dataset adding `bibliography: references.bib` in the front matter and using the correct citation key (found in `references.bib`). 
 - Read the dataset (`data/derived/cedel_dataset.rds`) and describe the dataset:
   - How many compositions (observations) are in this dataset?
   - How many measures (variables) are in this dataset?

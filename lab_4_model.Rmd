@@ -45,16 +45,16 @@ In the CEDEL2 [@Lozano2009] dataset there are 1,931 compositions and seven varia
 A summary of the categorical variable `sex` suggests that there are more females in this dataset than males.
 
 ```{r cedel-sex}
-cedel %>% 
+cedel %>% # dataset
   tabyl(sex) # create tabulation fo the `sex` variable
 ```
 
 A summary of the categorical variable `proficiency` suggests that most learner levels have a similar number of participants, except for the lowest level ("Lower beginner"). 
 
 ```{r cedel-proficiency}
-cedel %>% 
+cedel %>% # dataset
   tabyl(proficiency) %>%  # create tabulation fo the `proficiency` variable
-  arrange(desc(n))
+  arrange(desc(n)) # sort dataset by n in descending order
 ```
 
 **Continuous**
@@ -66,6 +66,9 @@ cedel %>% # dataset
   skim() %>% # get variety of numeric summaries
   yank("numeric") # select only continuous variables (type: numeric)
 ```
+
+**The small histograph that appears when using the `skim()` function on numeric variables will cause issues when knitting to a PDF. To avoid them change the front matter under `pdf_document:` to include `latex_engine: xelatax`.**
+
 
 The `ttr` appears to the show the least variability. 
 
