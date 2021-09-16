@@ -67,7 +67,7 @@ cedel %>% # dataset
   yank("numeric") # select only continuous variables (type: numeric)
 ```
 
-**The small histograph that appears when using the `skim()` function on numeric variables will cause issues when knitting to a PDF. To avoid them change the front matter under `pdf_document:` to include `latex_engine: xelatax`.**
+**The small histogram that appears when using the `skim()` function on numeric variables will cause issues when knitting to a PDF. To avoid them change the front matter under `pdf_document:` to include `latex_engine: xelatax`.**
 
 
 The `ttr` appears to the show the least variability. 
